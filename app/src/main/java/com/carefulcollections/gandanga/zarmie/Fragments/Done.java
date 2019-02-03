@@ -41,7 +41,6 @@ import java.util.List;
  */
 
 public class Done extends Fragment {
-
     private List<Order> orderList = new ArrayList<>();
     private RecyclerView recyclerView;
     private AcceptedOrdersAdapter mAdapter;
