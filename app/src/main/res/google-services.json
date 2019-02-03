@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "991051424596",
+    "firebase_url": "https://zarmie-1501823205982.firebaseio.com",
+    "project_id": "zarmie-1501823205982",
+    "storage_bucket": "zarmie-1501823205982.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:991051424596:android:6cd0f6de1ee2c5df",
+        "android_client_info": {
+          "package_name": "com.carefulcollections.gandanga.zarmie"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "991051424596-qeih5ddljmktl4ccggppih5oueokntla.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdikIyvv3l7_8DLtM38f1wg4uVk0V-ZKQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
