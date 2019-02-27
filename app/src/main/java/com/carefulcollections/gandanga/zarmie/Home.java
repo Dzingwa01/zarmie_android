@@ -1,5 +1,9 @@
 package com.carefulcollections.gandanga.zarmie;
 
+import android.app.AlarmManager;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -7,6 +11,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
@@ -44,22 +49,39 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
+import com.pusher.client.Pusher;
+import com.pusher.client.PusherOptions;
+import com.pusher.client.channel.Channel;
+import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.pushnotifications.PushNotifications;
 
 public class Home extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-
+    String CHANNEL_ID = "MS1235";
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    private static Home inst;
+    AlarmManager alarmManager;
+    private PendingIntent pendingIntent;
+
+    public static Home instance(){
+        return inst;
+    }
     private int[] tabIcons = {
             R.drawable.ic_baseline_shopping_cart_24px,
             R.drawable.ic_baseline_thumb_up_24px,
             R.drawable.ic_baseline_motorcycle_24px,
             R.drawable.ic_baseline_thumb_down_24px
     };
+    @Override
+    public void onStart() {
+        super.onStart();
+        inst = this;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,9 +115,40 @@ public class Home extends AppCompatActivity
         tabLayout.setupWithViewPager(viewPager);
         setupTabIcons();
         PushNotifications.start(getApplicationContext(), "adcaafab-3f97-4c96-9811-547f5c7ff032");
-        PushNotifications.subscribe("orders-channel");
+        PushNotifications.addDeviceInterest("orders-channel-notifications");
+        initializePusher();
 
     }
+
+    public void setAlarm(){
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, Calendar.getInstance().get(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, Calendar.getInstance().get(Calendar.MINUTE));
+        Intent myIntent = new Intent(Home.this, AlarmReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(Home.this, 0, myIntent, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+    }
+
+
+    public void initializePusher(){
+        PusherOptions options = new PusherOptions();
+        options.setCluster("eu");
+        Pusher pusher = new Pusher("8787890e09bb11d146f4", options);
+
+        Channel channel = pusher.subscribe("orders-channel");
+
+        channel.bind("order-received-event", new SubscriptionEventListener() {
+            @Override
+            public void onEvent(String channelName, String eventName, final String data) {
+                setAlarm();
+            }
+        });
+
+        pusher.connect();
+    }
+
     private void setupTabIcons() {
         tabLayout.getTabAt(0).setIcon(tabIcons[0]);
         tabLayout.getTabAt(1).setIcon(tabIcons[1]);

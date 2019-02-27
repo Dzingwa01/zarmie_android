@@ -4,12 +4,14 @@ package com.carefulcollections.gandanga.zarmie.Fragments;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -21,6 +23,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -33,6 +36,7 @@ import com.android.volley.toolbox.Volley;
 import com.carefulcollections.gandanga.zarmie.Adapters.OrdersAdapter;
 import com.carefulcollections.gandanga.zarmie.Home;
 import com.carefulcollections.gandanga.zarmie.Models.Order;
+import com.carefulcollections.gandanga.zarmie.MyBroadcastReceiver;
 import com.carefulcollections.gandanga.zarmie.R;
 
 import org.json.JSONArray;
@@ -50,6 +54,8 @@ import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.SubscriptionEventListener;
 
+import static android.content.Context.ALARM_SERVICE;
+
 /**
  * Created by Gandanga on 2019-01-31.
  */
@@ -65,12 +71,17 @@ public class CurrentOrders extends Fragment {
     String CHANNEL_ID = "MS1235";
     Context context;
 
+    private AlarmManager alarmMgr;
+    private PendingIntent alarmIntent;
+
+
     public CurrentOrders(){}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     public void initializePusher(){
@@ -100,24 +111,38 @@ public class CurrentOrders extends Fragment {
                             }
                         });
                     }
-
-                    Intent intent = new Intent(getActivity(), Home.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
-                    NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getContext())
-                            .setSmallIcon(R.drawable.ic_notification_icon)
-                            .setContentTitle("New Order - " +order.item_name + " - "+order.item_category)
-                            .setContentText(order.name + " " +order.surname)
-                            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-                    NotificationManager mNotificationManager =
-                            (NotificationManager) getActivity().getSystemService(getContext().NOTIFICATION_SERVICE);
-                    mBuilder.setContentIntent(pendingIntent);
-                    mNotificationManager.notify(order.id, mBuilder.build());
+////                    alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+////                    Intent intent = new Intent(context, AlarmReceiver.class);
+////                    alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+//
+//                    Intent intent = new Intent(getActivity(), Home.class);
+//                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                    PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
+//                    NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getContext())
+//                            .setSmallIcon(R.drawable.ic_notification_icon)
+//                            .setContentTitle("New Order - " +order.item_name + " - "+order.item_category)
+//                            .setContentText(order.name + " " +order.surname)
+//                            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+//                    NotificationManager mNotificationManager =
+//                            (NotificationManager) getActivity().getSystemService(getContext().NOTIFICATION_SERVICE);
+//                    mBuilder.setContentIntent(pendingIntent);
+//                    mNotificationManager.notify(order.id, mBuilder.build());
+////                    startAlert();
                 }
             }
         });
 
         pusher.connect();
+    }
+
+    public void startAlert() {
+        int timeInSec = 2;
+        Intent intent = new Intent(getActivity(), MyBroadcastReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                getActivity().getApplicationContext(), 234, intent, 0);
+        AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() +(timeInSec*1000), pendingIntent);
+
     }
 
     public void setAdapter(){
@@ -279,4 +304,9 @@ public class CurrentOrders extends Fragment {
 
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
 }

@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -28,6 +30,10 @@
             </intent-filter>
 
         </activity>
+        <service
+            android:name=".AlarmService"
+            android:enabled="true" />
+        <receiver android:name=".AlarmReceiver" />
         <!--<service android:name=".java.MyFirebaseMessagingService">-->
             <!--<intent-filter>-->
                 <!--<action android:name="com.google.firebase.MESSAGING_EVENT" />-->
